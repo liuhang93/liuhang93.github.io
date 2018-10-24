@@ -21,12 +21,12 @@
     </item>
     
     <item>
-      <title>My First Post</title>
-      <link>https://liuhang93.github.io/posts/my-first-post/</link>
+      <title>Go-http/net</title>
+      <link>https://liuhang93.github.io/posts/go-http-net/</link>
       <pubDate>Wed, 24 Oct 2018 18:34:04 +0800</pubDate>
       
-      <guid>https://liuhang93.github.io/posts/my-first-post/</guid>
-      <description> 你在  </description>
+      <guid>https://liuhang93.github.io/posts/go-http-net/</guid>
+      <description> 测试  你在  </description>
     </item>
     
   </channel>
