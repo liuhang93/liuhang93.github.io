@@ -2,31 +2,22 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Posts on 刘航的博客</title>
-    <link>https://liuhang93.github.io/posts/</link>
+    <link>https://liuhang.net.cn/posts/</link>
     <description>Recent content in Posts on 刘航的博客</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language>
-    <lastBuildDate>Wed, 24 Oct 2018 21:41:31 +0800</lastBuildDate>
+    <language>zh-CN</language>
+    <lastBuildDate>Wed, 24 Oct 2018 18:34:04 +0800</lastBuildDate>
     
-	<atom:link href="https://liuhang93.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://liuhang.net.cn/posts/index.xml" rel="self" type="application/rss+xml" />
     
-    
-    <item>
-      <title>My Seconde Post</title>
-      <link>https://liuhang93.github.io/posts/my-seconde-post/</link>
-      <pubDate>Wed, 24 Oct 2018 21:41:31 +0800</pubDate>
-      
-      <guid>https://liuhang93.github.io/posts/my-seconde-post/</guid>
-      <description></description>
-    </item>
     
     <item>
       <title>Go-http/net</title>
-      <link>https://liuhang93.github.io/posts/go-http-net/</link>
+      <link>https://liuhang.net.cn/posts/go-http-net/</link>
       <pubDate>Wed, 24 Oct 2018 18:34:04 +0800</pubDate>
       
-      <guid>https://liuhang93.github.io/posts/go-http-net/</guid>
-      <description> 测试  你在  </description>
+      <guid>https://liuhang.net.cn/posts/go-http-net/</guid>
+      <description> 参考 </description>
     </item>
     
   </channel>

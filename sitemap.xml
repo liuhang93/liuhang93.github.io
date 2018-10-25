@@ -3,63 +3,48 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://liuhang93.github.io/posts/my-seconde-post/</loc>
-    <lastmod>2018-10-24T21:41:31+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://liuhang93.github.io/posts/go-http-net/</loc>
+    <loc>https://liuhang.net.cn/posts/go-http-net/</loc>
     <lastmod>2018-10-24T18:34:04+08:00</lastmod>
   </url>
   
   <url>
-    <loc>https://liuhang93.github.io/about/tt/</loc>
-    <lastmod>2018-10-24T18:34:04+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://liuhang93.github.io/about/</loc>
-    <lastmod>2018-10-24T18:34:04+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://liuhang93.github.io/categories/</loc>
+    <loc>https://liuhang.net.cn/categories/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://liuhang93.github.io/tags/go/</loc>
+    <loc>https://liuhang.net.cn/categories/go/</loc>
     <lastmod>2018-10-24T18:34:04+08:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://liuhang93.github.io/categories/go/</loc>
+    <loc>https://liuhang.net.cn/tags/go/</loc>
     <lastmod>2018-10-24T18:34:04+08:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://liuhang93.github.io/categories/network/</loc>
+    <loc>https://liuhang.net.cn/categories/network/</loc>
     <lastmod>2018-10-24T18:34:04+08:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://liuhang93.github.io/posts/</loc>
-    <lastmod>2018-10-24T21:41:31+08:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>https://liuhang93.github.io/tags/</loc>
+    <loc>https://liuhang.net.cn/posts/</loc>
     <lastmod>2018-10-24T18:34:04+08:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://liuhang93.github.io/</loc>
-    <lastmod>2018-10-24T21:41:31+08:00</lastmod>
+    <loc>https://liuhang.net.cn/tags/</loc>
+    <lastmod>2018-10-24T18:34:04+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://liuhang.net.cn/</loc>
+    <lastmod>2018-10-24T18:34:04+08:00</lastmod>
     <priority>0</priority>
   </url>
   
