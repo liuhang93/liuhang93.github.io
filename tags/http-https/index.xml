@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Http/Https on 刘航的博客</title>
+    <link>https://liuhang.net.cn/tags/http-https/</link>
+    <description>Recent content in Http/Https on 刘航的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Wed, 31 Oct 2018 11:19:17 +0800</lastBuildDate>
+    
+	<atom:link href="https://liuhang.net.cn/tags/http-https/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Http/Https总结01-Https入门</title>
+      <link>https://liuhang.net.cn/posts/network/http-https%E6%80%BB%E7%BB%9301-https%E5%85%A5%E9%97%A8/</link>
+      <pubDate>Wed, 31 Oct 2018 11:19:17 +0800</pubDate>
+      
+      <guid>https://liuhang.net.cn/posts/network/http-https%E6%80%BB%E7%BB%9301-https%E5%85%A5%E9%97%A8/</guid>
+      <description> 关键点：  非对称加密: 公钥加密，私钥解密；私钥签名，公钥验签。 对称加密 消息摘要(hash算法),md5,sha256等 数字证书机制 (前三点也是区块链技术中的重要点)  参考  https原理详解,看完这个基本能懂 What is a Digital Signature?,翻译版：数字签名是什么  </description>
+    </item>
+    
+  </channel>
+</rss>

@@ -6,18 +6,27 @@
     <description>Recent content in Network on 刘航的博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Wed, 24 Oct 2018 18:34:04 +0800</lastBuildDate>
+    <lastBuildDate>Wed, 31 Oct 2018 11:19:17 +0800</lastBuildDate>
     
 	<atom:link href="https://liuhang.net.cn/categories/network/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
+      <title>Http/Https总结01-Https入门</title>
+      <link>https://liuhang.net.cn/posts/network/http-https%E6%80%BB%E7%BB%9301-https%E5%85%A5%E9%97%A8/</link>
+      <pubDate>Wed, 31 Oct 2018 11:19:17 +0800</pubDate>
+      
+      <guid>https://liuhang.net.cn/posts/network/http-https%E6%80%BB%E7%BB%9301-https%E5%85%A5%E9%97%A8/</guid>
+      <description> 关键点：  非对称加密: 公钥加密，私钥解密；私钥签名，公钥验签。 对称加密 消息摘要(hash算法),md5,sha256等 数字证书机制 (前三点也是区块链技术中的重要点)  参考  https原理详解,看完这个基本能懂 What is a Digital Signature?,翻译版：数字签名是什么  </description>
+    </item>
+    
+    <item>
       <title>Go-http/net</title>
-      <link>https://liuhang.net.cn/posts/go-http-net/</link>
+      <link>https://liuhang.net.cn/posts/go/go-http-net/</link>
       <pubDate>Wed, 24 Oct 2018 18:34:04 +0800</pubDate>
       
-      <guid>https://liuhang.net.cn/posts/go-http-net/</guid>
-      <description> 参考 </description>
+      <guid>https://liuhang.net.cn/posts/go/go-http-net/</guid>
+      <description> 参考  go netwok  </description>
     </item>
     
   </channel>
