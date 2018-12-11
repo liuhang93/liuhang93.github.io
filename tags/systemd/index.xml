@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Systemd on 刘航的博客</title>
+    <title>Systemd on 刘航</title>
     <link>https://liuhang.net.cn/tags/systemd/</link>
-    <description>Recent content in Systemd on 刘航的博客</description>
+    <description>Recent content in Systemd on 刘航</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
     <lastBuildDate>Fri, 02 Nov 2018 11:34:15 +0800</lastBuildDate>
