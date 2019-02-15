@@ -118,20 +118,38 @@ type hmap struct {
 	// Note: the format of the hmap is also encoded in cmd/compile/internal/gc/reflect.go.
 	// Make sure this stays in sync with the compiler's definition.
 	count     int // # live cells == size of map.  Must be first (used by len() builtin) len()返回的map的大小,即有多少kv对
-	flags     uint8
+	flags     uint8 // 状态标志
 	B         uint8  // log_2 of # of buckets (can hold up to loadFactor * 2^B items)
-	noverflow uint16 // approximate number of overflow buckets; see incrnoverflow for details
+	noverflow uint16 // approximate number of overflow buckets; see incrnoverflow for details 溢出的bucket个数
 	hash0     uint32 // hash seed
 
 	buckets    unsafe.Pointer // array of 2^B Buckets. may be nil if count==0.
-	oldbuckets unsafe.Pointer // previous bucket array of half the size, non-nil only when growing
-	nevacuate  uintptr        // progress counter for evacuation (buckets less than this have been evacuated) 迁移进度
+	oldbuckets unsafe.Pointer // previous bucket array of half the size, non-nil only when growing 扩容时用于复制bucket数组
+	nevacuate  uintptr        // progress counter for evacuation (buckets less than this have been evacuated) 迁移进度,已经迁移了多少buckets
 
 	extra *mapextra // optional fields
 }
 </code></pre>
 
-<h2 id="how-maps-find-k-v-查找过程">How Maps Find K-V 查找过程</h2>
+<pre><code class="language-go">// A bucket for a Go map.
+type bmap struct {
+	// tophash generally contains the top byte of the hash value
+	// for each key in this bucket. If tophash[0] &lt; minTopHash,
+	// tophash[0] is a bucket evacuation state instead.
+	tophash [bucketCnt]uint8
+	// Followed by bucketCnt keys and then bucketCnt values. 后面跟随8个key和8个value
+	// NOTE: packing all the keys together and then all the values together makes the
+	// code a bit more complicated than alternating key/value/key/value/... but it allows
+	// us to eliminate padding which would be needed for, e.g., map[int64]int8. 内存对齐优化
+	// Followed by an overflow pointer. 指向扩容后的bucket的指针
+}
+</code></pre>
+
+<p><img src="/image/go_map.png" alt="" /></p>
+
+<h2 id="how-maps-make-查找过程">How Maps Make 查找过程</h2>
+
+<h2 id="how-maps-find-kv-访问">How Maps Find KV 访问</h2>
 
 <h2 id="how-maps-grow-扩容机制">How Maps Grow 扩容机制</h2>
 
@@ -142,8 +160,8 @@ type hmap struct {
 <ol>
 <li><a href="https://blog.golang.org/go-maps-in-action">go maps in action</a></li>
 <li><a href="https://www.ardanlabs.com/blog/2013/12/macro-view-of-map-internals-in-go.html">macro-view-of-map-internals-in-go</a></li>
-<li><a href="https://tiancaiamao.gitbooks.io/go-internals/content/zh/02.3.html">map的实现</a></li>
-<li><a href="https://guidao.github.io/go_map.html">GO Map内部实现</a></li>
+<li><a href="https://tiancaiamao.gitbooks.io/go-internals/content/zh/02.3.html">go internals</a></li>
+<li><a href="https://guidao.github.io/go_map.html">go_map</a></li>
 <li><a href="https://www.ardanlabs.com/blog/2013/07/understanding-type-in-go.html">understanding-type-in-go</a></li>
 <li><a href="https://ninokop.github.io/2017/10/24/Go-Hashmap%E5%86%85%E5%AD%98%E5%B8%83%E5%B1%80%E5%92%8C%E5%AE%9E%E7%8E%B0/">Go-Hashmap内存布局和实现</a></li>
 <li><a href="https://www.jianshu.com/p/aa0d4808cbb8">Golang map 的底层实现</a></li>
