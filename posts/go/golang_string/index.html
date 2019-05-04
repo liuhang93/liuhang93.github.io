@@ -7,20 +7,20 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Vim总结 | 刘航</title>
-    <meta property="og:title" content="Vim总结 - 刘航">
+    <title>Golang String | 刘航</title>
+    <meta property="og:title" content="Golang String - 刘航">
     <meta property="og:type" content="article">
         
-    <meta property="article:published_time" content="2018-11-11T01:38:28&#43;08:00">
+    <meta property="article:published_time" content="2019-04-23T17:49:27&#43;08:00">
         
         
-    <meta property="article:modified_time" content="2018-11-11T01:38:28&#43;08:00">
+    <meta property="article:modified_time" content="2019-04-23T17:49:27&#43;08:00">
         
     <meta name="Keywords" content="golang,python,network,服务端,架构,算法">
-    <meta name="description" content="Vim总结">
+    <meta name="description" content="Golang String">
         
     <meta name="author" content="刘航">
-    <meta property="og:url" content="https://liuhang.net.cn/posts/vim/vim%E6%80%BB%E7%BB%93/">
+    <meta property="og:url" content="https://liuhang.net.cn/posts/go/golang_string/">
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
 
     <link rel="stylesheet" href="/css/normalize.css">
@@ -69,23 +69,87 @@
                 <div class="res-cons">
                     <article class="post">
                         <header>
-                            <h1 class="post-title">Vim总结</h1>
+                            <h1 class="post-title">Golang String</h1>
                         </header>
                         <date class="post-meta meta-date">
-                            2018年11月11日
+                            2019年4月23日
                         </date>
-                        
-                        <div class="post-meta meta-category">
-                            |
-                            
-                                <a href="/categories/vim">vim</a>
-                            
-                        </div>
                         
                         
                         <div class="post-content">
-                            <ol>
-<li>ctrlp.vim使用</li>
+                            
+
+<blockquote>
+<p>本文对golang中string的用法和底层实现进行了总结和探究。</p>
+</blockquote>
+
+<h1 id="go-string基本用法">Go String基本用法</h1>
+
+<h2 id="go-string-specification">Go String Specification</h2>
+
+<ol>
+<li><p>A string type represents the set of string values. A string value is a (possibly empty) sequence of bytes.
+The number of bytes is called the length of the string and is never negative. Strings are immutable: once created,
+it is impossible to change the contents of a string. The predeclared string type is string; it is a defined type.</p></li>
+
+<li><p>The length of a string s can be discovered using the built-in function len. The length is a compile-time constant
+if the string is a constant. A string&rsquo;s bytes can be accessed by integer indices 0 through len(s)-1. It is illegal
+to take the address of such an element; if s[i] is the i&rsquo;th byte of a string, &amp;s[i] is invalid. 不可被取地址</p></li>
+
+<li><p>标准库builtin的解释</p>
+
+<pre><code>// string is the set of all strings of 8-bit bytes, conventionally but not
+// necessarily representing UTF-8-encoded text. A string may be empty, but
+// not nil. Values of string type are immutable.
+type string string
+</code></pre></li>
+</ol>
+
+<h2 id="总结">总结：</h2>
+
+<ol>
+<li>字符串是不可变的字节序列(immutable)。</li>
+<li>内置的len函数返回字符串的字节数（不是rune字符数）。</li>
+<li>字符串的比较，结果为字典序的比较。</li>
+<li>索引操作s[i],返回第i个字节的字节值。s[i]=&lsquo;L&rsquo;是非法的，字符串不可被修改。</li>
+<li>原生字符串 <code>xxx</code>,用反引号括起来。</li>
+<li>range循环处理字符串时，会自动隐式解码utf8字符串。</li>
+</ol>
+
+<h2 id="string-与-byte">string 与 []byte</h2>
+
+<ol>
+<li>byte类型即uint8</li>
+<li>string和[]byte相互转换都会有新的内存分配</li>
+</ol>
+
+<h2 id="bytes包">bytes包</h2>
+
+<ol>
+<li>bytes.Buffer使用。</li>
+<li><a href="https://golang.org/pkg/bytes/">bytes包文档</a></li>
+</ol>
+
+<h2 id="strings包">strings包</h2>
+
+<ol>
+<li>strings.Builder使用。It minimizes memory copying. 避免频繁内存分配</li>
+<li>参考<a href="https://juejin.im/entry/5ad0696751882555784e60d3">Golang strings.Builder 原理解析</a></li>
+</ol>
+
+<h2 id="strconv包-unicode包">strconv包 &amp;&amp; unicode包</h2>
+
+<ol>
+<li>待总结</li>
+</ol>
+
+<h1 id="reference-参考">Reference 参考</h1>
+
+<ol>
+<li><a href="https://sheepbao.github.io/post/golang_byte_slice_and_string/">golang中string和[]byte的对比</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/22309501">bytes包详解</a></li>
+<li><a href="https://juejin.im/entry/5ad0696751882555784e60d3">Golang strings.Builder 原理解析</a></li>
+<li><a href="https://blog.golang.org/strings">Strings, bytes, runes and characters in Go</a></li>
 </ol>
 
                         </div>
@@ -96,15 +160,15 @@
     <h2>See Also</h2>
     <ul class="listing">
         
+        <li><a href="/posts/go/golang_struct/">Golang Struct</a></li>
+        
+        <li><a href="/posts/go/golang_slice/">Golang Slice</a></li>
+        
+        <li><a href="/posts/go/golang_map/">Go总结03 Map</a></li>
+        
+        <li><a href="/posts/vim/vim%E6%80%BB%E7%BB%93/">Vim总结</a></li>
+        
         <li><a href="/posts/go/golang_awesome/">Go总结02-golang常用工具库</a></li>
-        
-        <li><a href="/posts/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%9503-%E6%95%A3%E5%88%97%E8%A1%A8/">数据结构与算法03-散列表</a></li>
-        
-        <li><a href="/posts/go/golang_basics/">Golang-Basics</a></li>
-        
-        <li><a href="/posts/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%9502-%E7%BA%BF%E6%80%A7%E8%A1%A8/">数据结构与算法02-线性表</a></li>
-        
-        <li><a href="/posts/markdown/markdown%E8%AF%AD%E6%B3%95/">markdown语法</a></li>
         
     </ul>
 </div>

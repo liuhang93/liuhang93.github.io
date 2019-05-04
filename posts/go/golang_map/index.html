@@ -1,0 +1,701 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta name="generator" content="Hugo 0.49.2" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Go总结03 Map | 刘航</title>
+    <meta property="og:title" content="Go总结03 Map - 刘航">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content="2019-02-03T11:14:36&#43;08:00">
+        
+        
+    <meta property="article:modified_time" content="2019-02-03T11:14:36&#43;08:00">
+        
+    <meta name="Keywords" content="golang,python,network,服务端,架构,算法">
+    <meta name="description" content="Go总结03 Map">
+        
+    <meta name="author" content="刘航">
+    <meta property="og:url" content="https://liuhang.net.cn/posts/go/golang_map/">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
+    <link rel="stylesheet" href="/css/normalize.css">
+    
+        <link rel="stylesheet" href="/css/prism.css">
+    
+    <link rel="stylesheet" href="/css/style.css">
+    <script type="text/javascript" src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+
+    
+    
+</head>
+
+<body>
+<header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://liuhang.net.cn/">
+                        刘航
+                    </a>
+                
+                <p class="description">update weekly</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="" href="https://liuhang.net.cn/">首页</a>
+                    
+                    <a  href="https://liuhang.net.cn/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://liuhang.net.cn/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+<div id="body">
+    <div class="container">
+        <div class="col-group">
+
+            <div class="col-8" id="main">
+                <div class="res-cons">
+                    <article class="post">
+                        <header>
+                            <h1 class="post-title">Go总结03 Map</h1>
+                        </header>
+                        <date class="post-meta meta-date">
+                            2019年2月3日
+                        </date>
+                        
+                        <div class="post-meta meta-category">
+                            |
+                            
+                                <a href="/categories/golang">Golang</a>
+                            
+                        </div>
+                        
+                        
+                        <div class="post-content">
+                            
+
+<blockquote>
+<p>本文对golang中map的用法和底层实现进行了总结和探究。</p>
+</blockquote>
+
+<h1 id="go-maps-basic-use-基本使用">Go Maps Basic Use 基本使用</h1>
+
+<blockquote>
+<p>首先，对golang map的基本使用和注意事项进行总结。</p>
+</blockquote>
+
+<h2 id="declaration-initialization-assign-iteration-delete-声明-初始化-赋值-迭代-删除">Declaration， initialization， assign， iteration， delete 声明、初始化、赋值、迭代、删除</h2>
+
+<ol>
+<li><p>map类型可以定义如下: A map is an <strong>unordered</strong> group of elements of one type， called the element type，
+indexed by a set of unique keys of another type， called the key type.(<a href="https://golang.org/ref/spec#Map_types">https://golang.org/ref/spec#Map_types</a>)</p></li>
+
+<li><p>示例代码如下</p></li>
+</ol>
+
+<h2 id="key-types-key的类型">Key types key的类型</h2>
+
+<p>摘自: <a href="https://blog.golang.org/go-maps-in-action">go maps in action</a>
+1.  map keys may be of any type that is comparable，The language spec defines this precisely，
+but in short， comparable types are <strong>boolean</strong>， <strong>numeric</strong>， string， pointer， channel， and interface types，
+and structs or arrays that contain only those types.
+2. Notably absent from the list are slices， maps，
+and functions; these types cannot be compared using ==， and may not be used as map keys.</p>
+
+<h2 id="concurrency-并发使用">Concurrency 并发使用</h2>
+
+<ol>
+<li>并发</li>
+</ol>
+
+<h1 id="map-source-code-analysis-源码分析">Map Source Code Analysis 源码分析</h1>
+
+<blockquote>
+<p>golang map的源码位于 <a href="https://golang.org/src/runtime/map.go">https://golang.org/src/runtime/map.go</a>. 下面结合map的源码，
+分析map的的数据结构和内存管理，以及map的创建、查询、分配、删除、扩容的的过程。</p>
+</blockquote>
+
+<h2 id="how-maps-are-structured-数据结构">How Maps Are Structured 数据结构</h2>
+
+<blockquote>
+<p>golang中的map的底层是一个hash table，关于hahs table的介绍参见<a href="https://en.wikipedia.org/wiki/Hash_table">wikipedia hashtable</a> ;
+golang中用链地址法解决hash冲突，即用<strong>数组+链表</strong>来实现map。下面上核心数据结构的代码：（每个字段的含义见代码中注释）</p>
+</blockquote>
+
+<pre><code class="language-go">// A header for a Go map.
+type hmap struct {
+	// Note: the format of the hmap is also encoded in cmd/compile/internal/gc/reflect.go.
+	// Make sure this stays in sync with the compiler's definition.
+	count     int // # live cells == size of map.  Must be first (used by len() builtin) len()返回的map的大小，即有多少kv对
+	flags     uint8 // 状态标志， 包括四种: iterator，olditerator，hashWriting，sameSizeGrow(对照源码开始定义的const常量可理解其含义)
+	B         uint8  // log_2 of # of buckets (can hold up to loadFactor * 2^B items)
+	noverflow uint16 // approximate number of overflow buckets; see incrnoverflow for details 溢出的bucket个数
+	hash0     uint32 // hash seed
+
+	buckets    unsafe.Pointer // array of 2^B Buckets. may be nil if count==0.
+	oldbuckets unsafe.Pointer // previous bucket array of half the size， non-nil only when growing 扩容时用于复制bucket数组
+	nevacuate  uintptr        // progress counter for evacuation (buckets less than this have been evacuated) 迁移进度，已经迁移了多少buckets
+
+	extra *mapextra // optional fields
+}
+</code></pre>
+
+<pre><code class="language-go">// A bucket for a Go map.
+type bmap struct {
+	// tophash generally contains the top byte of the hash value
+	// for each key in this bucket. If tophash[0] &lt; minTopHash，
+	// tophash[0] is a bucket evacuation state instead. 每个key的hash值的高8位
+	tophash [bucketCnt]uint8
+	// Followed by bucketCnt keys and then bucketCnt values. 后面跟随8个key和8个value
+	// NOTE: packing all the keys together and then all the values together makes the
+	// code a bit more complicated than alternating key/value/key/value/... but it allows
+	// us to eliminate padding which would be needed for， e.g.， map[int64]int8. 内存对齐优化
+	// Followed by an overflow pointer. 指向溢出的bucket
+}
+</code></pre>
+
+<ol>
+<li>hmap中extra字段中有三个数组: overflow, oldoverflow, nextoverflow；主要目的是保持溢出的bucket alive，防止被gc；（这里待详细研究）</li>
+<li>B用来计算bucket数组的长度, bucket数组长度为2^B; 每个bucket中能存储8个kv对;</li>
+<li>数组的基本元素是bucket， 一个bucket中，tophash是个大小为8(bucketCnt)的数组，
+存储了8个key的hash值的高八位值；查找元素时, 先用key的hash值定位bucket的位置，在bucket中，再用key的高8位定位value的具体位置(即先确定在大数组的位置,再确定在bucket内部数组中的位置)</li>
+<li>在tophash数组后跟着8个key/value对；其中8个key连续，然后是8个value,
+这里考虑了内存对齐的优化。（关于内存对齐的介绍和解释可参考:<a href="http://www.goinggo.net/2013/07/understanding-type-in-go.html">understanding-type-in-go</a>）
+和<a href="https://blog.csdn.net/rongwenbin/article/details/18604005">为什么要内存对齐？</a>;</li>
+<li>hash冲突时，如果在一个bucket中kv填满了(溢出了),bucket末尾有一个指向溢出的bucket的指针,形成了一个bucket链表</li>
+</ol>
+
+<p>一图胜千文：
+<img src="/image/go_map.png" alt="hash map buckets" /></p>
+
+<h2 id="how-maps-make-创建map">How Maps Make 创建map</h2>
+
+<blockquote>
+<p>主要过程包括：入参校验，申请hmap空间，计算bucket对应的B的值，申请bucket空间。</p>
+</blockquote>
+
+<pre><code class="language-go">func makemap(t *maptype， hint int， h *hmap) *hmap {
+	// The size of hmap should be 48 bytes on 64 bit
+	// and 28 bytes on 32 bit platforms. 入参校验
+	if sz := unsafe.Sizeof(hmap{}); sz != 8+5*sys.PtrSize {
+		println(&quot;runtime: sizeof(hmap) =&quot;， sz， &quot;， t.hmap.size =&quot;， t.hmap.size)
+		throw(&quot;bad hmap size&quot;)
+	}
+
+	if hint &lt; 0 || hint &gt; int(maxSliceCap(t.bucket.size)) {
+		hint = 0
+	}
+
+	// initialize Hmap 初始化hmap结构
+	if h == nil {
+		h = (*hmap)(newobject(t.hmap))
+	}
+	h.hash0 = fastrand() hash种子
+
+	// find size parameter which will hold the requested # of elements 计算bucket数组的长度对应的B
+	B := uint8(0)
+	for overLoadFactor(hint， B) { // overLoadFactor函数比较巧妙，值得一看
+		B++
+	}
+	h.B = B
+
+	// allocate initial hash table
+	// if B == 0， the buckets field is allocated lazily later (in mapassign)
+	// If hint is large zeroing this memory could take a while. 优化，B为0时，buckets数组空间申请 懒加载
+	if h.B != 0 {
+		var nextOverflow *bmap
+		h.buckets， nextOverflow = makeBucketArray(t， h.B)
+		if nextOverflow != nil {
+			h.extra = new(mapextra)
+			h.extra.nextOverflow = nextOverflow
+		}
+	}
+
+	return h
+}
+</code></pre>
+
+<ol>
+<li>其中，当B=0时，申请bucket数组空间，为懒加载;</li>
+<li>计算B时，overLoadFactor函数如下
+<code>go
+// overLoadFactor reports whether count items placed in 1&lt;&lt;B buckets is over loadFactor.
+func overLoadFactor(count int, B uint8) bool {
+	return count &gt; bucketCnt &amp;&amp; uintptr(count) &gt; loadFactorNum*(bucketShift(B)/loadFactorDen)
+}
+</code></li>
+</ol>
+
+<h2 id="how-maps-find-kv-and-assign-访问和分配">How Maps Find KV and Assign 访问和分配</h2>
+
+<ol>
+<li>过程： 用key的hash对bucket数组长度取模，找到对应的bucket，然后在bucket内部，
+用hash值的高位（高8位），与topHash数组对比，找到对应的key，然后取出value</li>
+<li>bucket数组长度为什么要设置为2^n:
+
+<ul>
+<li>计算索引时，通常用hash值对数组长度取模运算，当容量一定是2^n时，<code>h &amp; (length - 1) == h % length</code>，&amp;比%具有更高的效率，从而优化了计算索引的效率。</li>
+<li>因为空间是2倍扩容，那么扩容后某个key的落点，要么仍旧是原来的位置，要么是原来的位置加上原先容量后的位置。这样可以快速确认扩容后元素的落点。（后面讲扩容机制时会用到）</li>
+</ul></li>
+<li>为一个key分配空间的逻辑，大致与方位位类似；但增加了写保护和扩容的的逻辑</li>
+<li>不是正在扩容, 到达负载因子或者有太多溢出的bucket时触发hashGrow逻辑; 正在扩容时: 触发growWork逻辑。
+这两个逻辑与扩容机制密切相关;下个部分对这两个逻辑进行分析。</li>
+</ol>
+
+<pre><code class="language-go">// Like mapaccess, but allocates a slot for the key if it is not present in the map.
+func mapassign(t *maptype, h *hmap, key unsafe.Pointer) unsafe.Pointer {
+	if h == nil {
+		panic(plainError(&quot;assignment to entry in nil map&quot;))
+	}
+	if raceenabled { // 竞争检测? --race命令, enable data race detection.?
+		callerpc := getcallerpc()
+		pc := funcPC(mapassign)
+		racewritepc(unsafe.Pointer(h), callerpc, pc)
+		raceReadObjectPC(t.key, key, callerpc, pc)
+	}
+	if msanenabled {
+		msanread(key, t.key.size)
+	}
+	if h.flags&amp;hashWriting != 0 {  // 写保护, hmpa中flag标志位用上了在这
+		throw(&quot;concurrent map writes&quot;)
+	}
+	alg := t.key.alg
+	hash := alg.hash(key, uintptr(h.hash0))
+
+	// Set hashWriting after calling alg.hash, since alg.hash may panic,
+	// in which case we have not actually done a write.
+	h.flags |= hashWriting
+
+	if h.buckets == nil {
+		h.buckets = newobject(t.bucket) // newarray(t.bucket, 1)
+	}
+
+again:
+    // 确定bucket位置
+	bucket := hash &amp; bucketMask(h.B)
+    // 如果正在扩容, 触发扩容操作growWork
+	if h.growing() {
+		growWork(t, h, bucket)
+	}
+	b := (*bmap)(unsafe.Pointer(uintptr(h.buckets) + bucket*uintptr(t.bucketsize)))
+	top := tophash(hash)
+
+	var inserti *uint8
+	var insertk unsafe.Pointer
+	var val unsafe.Pointer
+	for {
+        // 遍历bucket中kv对,只有8个,顺序遍历也没有问题
+		for i := uintptr(0); i &lt; bucketCnt; i++ {
+			if b.tophash[i] != top {
+				if b.tophash[i] == empty &amp;&amp; inserti == nil {
+					inserti = &amp;b.tophash[i]
+					insertk = add(unsafe.Pointer(b), dataOffset+i*uintptr(t.keysize))
+					val = add(unsafe.Pointer(b), dataOffset+bucketCnt*uintptr(t.keysize)+i*uintptr(t.valuesize))
+				}
+				continue
+			}
+			k := add(unsafe.Pointer(b), dataOffset+i*uintptr(t.keysize))
+			if t.indirectkey {
+				k = *((*unsafe.Pointer)(k))
+			}
+			if !alg.equal(key, k) {
+				continue
+			}
+			// already have a mapping for key. Update it.
+			if t.needkeyupdate {
+				typedmemmove(t.key, k, key)
+			}
+			val = add(unsafe.Pointer(b), dataOffset+bucketCnt*uintptr(t.keysize)+i*uintptr(t.valuesize))
+			goto done
+		}
+		ovf := b.overflow(t)
+		if ovf == nil {
+			break
+		}
+		b = ovf
+	}
+
+	// Did not find mapping for key. Allocate new cell &amp; add entry.
+
+	// If we hit the max load factor or we have too many overflow buckets,
+	// and we're not already in the middle of growing, start growing. 
+    // 不是正在扩容, 到达负载因子或者有太多溢出的bucket时触发hashGrow逻辑
+	if !h.growing() &amp;&amp; (overLoadFactor(h.count+1, h.B) || tooManyOverflowBuckets(h.noverflow, h.B)) {
+		hashGrow(t, h)
+		goto again // Growing the table invalidates everything, so try again
+	}
+
+	if inserti == nil {
+		// all current buckets are full, allocate a new one.
+        // 不需要扩容，新建一个overflow bucket溢出桶，并将其拼接在当前桶的尾部
+		newb := h.newoverflow(t, b)
+		inserti = &amp;newb.tophash[0]
+		insertk = add(unsafe.Pointer(newb), dataOffset)
+		val = add(insertk, bucketCnt*uintptr(t.keysize))
+	}
+
+	// store new key/value at insert position
+	if t.indirectkey {
+		kmem := newobject(t.key)
+		*(*unsafe.Pointer)(insertk) = kmem
+		insertk = kmem
+	}
+	if t.indirectvalue {
+		vmem := newobject(t.elem)
+		*(*unsafe.Pointer)(val) = vmem
+	}
+	typedmemmove(t.key, insertk, key)
+	*inserti = top
+	h.count++
+
+done:
+	if h.flags&amp;hashWriting == 0 {
+		throw(&quot;concurrent map writes&quot;)
+	}
+	h.flags &amp;^= hashWriting
+	if t.indirectvalue {
+		val = *((*unsafe.Pointer)(val))
+	}
+	return val
+}
+</code></pre>
+
+<h2 id="how-maps-grow-扩容机制">How Maps Grow 扩容机制</h2>
+
+<blockquote>
+<p>golang中的扩容可以理解为有两种扩容方式：overflow 以及 hashGrow：
+    - overflow 是溢出链，是bucket级别的扩容，理解成链表; （前面解释bucket数据结构时已经提到）mapaccess也要判断是不是在overflow
+    - hashGrow 则是再散列的实现。即 将bucket数组的长度扩容为原来的两倍。 rehash 过程不是同步一次性完成的，
+    而是被异步分摊到 mapassign 以及 mapdelete 即<strong>变更</strong>的操作上。</p>
+</blockquote>
+
+<h3 id="hashgrow逻辑">hashGrow逻辑:</h3>
+
+<blockquote>
+<p>hashGrow调用的时机是：没有正在搬迁的桶,且达到了负载因子或者overflow桶太多;主要完成的工作有:
+    - 判断是否要两倍扩容
+    - 将当前 buckets 和 overflow 的链，存储到 oldbuckets 以及对应的链
+    - 更新flag标志位
+    - 处理extra区域 &amp;&amp; 处理可能需要的预分配</p>
+</blockquote>
+
+<pre><code>func hashGrow(t *maptype, h *hmap) {
+	// If we've hit the load factor, get bigger.
+	// Otherwise, there are too many overflow buckets,
+	// so keep the same number of buckets and &quot;grow&quot; laterally.
+	bigger := uint8(1)
+    // 判断是否要用2倍扩容
+	if !overLoadFactor(h.count+1, h.B) {
+		bigger = 0
+		h.flags |= sameSizeGrow
+	}
+	oldbuckets := h.buckets
+	newbuckets, nextOverflow := makeBucketArray(t, h.B+bigger)
+
+    // 计算更新flag
+	flags := h.flags &amp;^ (iterator | oldIterator)
+	if h.flags&amp;iterator != 0 {
+		flags |= oldIterator
+	}
+	// commit the grow (atomic wrt gc)
+	h.B += bigger
+	h.flags = flags
+	h.oldbuckets = oldbuckets // 下面将buckets复制给oldbuckets
+	h.buckets = newbuckets
+	h.nevacuate = 0
+	h.noverflow = 0
+
+    // extra中存下，keep alive，防止被gc
+	if h.extra != nil &amp;&amp; h.extra.overflow != nil {
+		// Promote current overflow buckets to the old generation.
+		if h.extra.oldoverflow != nil {
+			throw(&quot;oldoverflow is not nil&quot;)
+		}
+		h.extra.oldoverflow = h.extra.overflow
+		h.extra.overflow = nil
+	}
+	if nextOverflow != nil {
+		if h.extra == nil {
+			h.extra = new(mapextra)
+		}
+		h.extra.nextOverflow = nextOverflow
+	}
+
+	// the actual copying of the hash table data is done incrementally
+	// by growWork() and evacuate().  增量扩容，真正执行扩容操作的是growWork()及evacuate(),疏散
+}
+
+</code></pre>
+
+<h3 id="growwork和evacuate逻辑">growWork和evacuate逻辑</h3>
+
+<blockquote>
+<p>growWork调用的时机是： mapassign以及mapdelete时，如果growing()正在搬迁(h.oldbuckets != nil),涉及到两个重要问题：
+    - 如何保证了迁移的完成: 在下一次2倍扩容时，上次扩容已经完成
+    - 数据如何迁移: 对于一个bucket，如何计算搬迁后它的位置</p>
+</blockquote>
+
+<ol>
+<li>先说第一个问题：看下面代码,growWork 调用了两次evacuate，首先是释放之前的数据所落在的 bucket ，
+然后是释放h.nevacuate对应的bucket（h.nevacute含义是，在此之前的 bucket 都已经被迁移）这个调用确保了，再次执行两倍扩容的时候，老数据已经完成了迁移。</li>
+</ol>
+
+<pre><code>func growWork(t *maptype, h *hmap, bucket uintptr) {
+	// make sure we evacuate the oldbucket corresponding
+	// to the bucket we're about to use
+    // 搬迁旧桶，这样assign和delete都直接在新桶集合中进行
+	evacuate(t, h, bucket&amp;h.oldbucketmask())
+
+	// evacuate one more oldbucket to make progress on growing
+    //根据搬迁进去，再搬迁一个桶,用来保下次扩容时，上一次扩容已经完成
+	if h.growing() {
+		evacuate(t, h, h.nevacuate)
+	}
+}
+</code></pre>
+
+<ol>
+<li>再看第二个问题，如何搬迁。</li>
+</ol>
+
+<pre><code>func evacuate(t *maptype, h *hmap, oldbucket uintptr)
+</code></pre>
+
+<pre><code>- 看下evactate的函数头，搬迁的基本单位是bucket桶；
+- 搬迁的核心是计算bucket的位置：这里把扩容后的空间，分为 X、Y 两个区域，X 在前，Y在后，两个空间均与扩容前空间相同。
+如何快速确认搬迁后的bucket的位置基于以下原理: **bucket数组大小为2^B， 新桶数组大小为2*2^B，对于某个hash值，
+它要么落入与旧桶集合相同的索引xi中；要么将落入xi + 2^B中**。(前面讲bucket数组长度为什么为2^B时提到)
+</code></pre>
+
+<h1 id="conclusion-总结">Conclusion 总结</h1>
+
+<blockquote>
+<p>总结下golang map中设计的比较有趣&amp;&amp;比较精髓的地方</p>
+</blockquote>
+
+<ol>
+<li>bucket结构中topHash： 用hash高8位在bucket内部查找kv</li>
+<li>扩容时的<strong>异步搬迁</strong>: 每次assign或者delete时搬迁； 搬迁进度字段nevacuate，保证下次扩容时搬迁完毕</li>
+<li>bucket数组长度为2^B，(Java hashmap的数组长度也这样设计)：优化取模运算的效率；扩容rehash时，快速计算索引</li>
+<li>hmap中extra字段，用于保证溢出的bucket不被gc（这里其实并没有很懂,待研究）</li>
+<li>负载因子的选择：每个bucket中存储了8个kv对，负载因子选择6.5(源码中作者给出了实验数据，这是个经验值，有待详细研究)</li>
+<li>bucket中key和value分别连续，内存对齐的优化。</li>
+</ol>
+
+<h1 id="reference-参考">Reference 参考</h1>
+
+<ol>
+<li><a href="https://en.wikipedia.org/wiki/Hash_table">wiki hash table</a></li>
+<li><a href="https://blog.golang.org/go-maps-in-action">go maps in action</a></li>
+<li><a href="https://www.ardanlabs.com/blog/2013/12/macro-view-of-map-internals-in-go.html">macro-view-of-map-internals-in-go</a></li>
+<li><a href="https://www.ardanlabs.com/blog/2013/07/understanding-type-in-go.html">understanding-type-in-go</a></li>
+<li><a href="https://ninokop.github.io/2017/10/24/Go-Hashmap%E5%86%85%E5%AD%98%E5%B8%83%E5%B1%80%E5%92%8C%E5%AE%9E%E7%8E%B0/">Go-Hashmap内存布局和实现</a></li>
+<li><a href="https://www.jianshu.com/p/aa0d4808cbb8">Golang map 的底层实现</a></li>
+<li><a href="https://blog.csdn.net/Totoro19/article/details/79581430">golang 的 map 实现（二）</a></li>
+</ol>
+
+                        </div>
+
+                        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/posts/vim/vim%E6%80%BB%E7%BB%93/">Vim总结</a></li>
+        
+        <li><a href="/posts/go/golang_awesome/">Go总结02-golang常用工具库</a></li>
+        
+        <li><a href="/posts/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%9503-%E6%95%A3%E5%88%97%E8%A1%A8/">数据结构与算法03-散列表</a></li>
+        
+        <li><a href="/posts/go/golang_basics/">Golang-Basics</a></li>
+        
+        <li><a href="/posts/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%9502-%E7%BA%BF%E6%80%A7%E8%A1%A8/">数据结构与算法02-线性表</a></li>
+        
+    </ul>
+</div>
+
+
+                        <div class="post-meta meta-tags">
+                            
+                            没有标签
+                            
+                        </div>
+                    </article>
+                    
+    
+
+    
+    
+                </div>
+            </div>
+            <div id="secondary">
+    <section class="widget">
+        <form id="search" action="//www.google.com/search" method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://liuhang.net.cn/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://liuhang.net.cn/posts/go/golang_interface/" title="Golang_interface">Golang_interface</a>
+    </li>
+    
+    <li>
+        <a href="https://liuhang.net.cn/posts/go/golang_modules/" title="Go总结06 Modules">Go总结06 Modules</a>
+    </li>
+    
+    <li>
+        <a href="https://liuhang.net.cn/posts/go/golang_string/" title="Golang String">Golang String</a>
+    </li>
+    
+    <li>
+        <a href="https://liuhang.net.cn/posts/go/golang_struct/" title="Golang Struct">Golang Struct</a>
+    </li>
+    
+    <li>
+        <a href="https://liuhang.net.cn/posts/go/golang_slice/" title="Golang Slice">Golang Slice</a>
+    </li>
+    
+    <li>
+        <a href="https://liuhang.net.cn/posts/go/golang_map/" title="Go总结03 Map">Go总结03 Map</a>
+    </li>
+    
+    <li>
+        <a href="https://liuhang.net.cn/posts/vim/vim%E6%80%BB%E7%BB%93/" title="Vim总结">Vim总结</a>
+    </li>
+    
+    <li>
+        <a href="https://liuhang.net.cn/posts/go/golang_awesome/" title="Go总结02-golang常用工具库">Go总结02-golang常用工具库</a>
+    </li>
+    
+    <li>
+        <a href="https://liuhang.net.cn/posts/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%9503-%E6%95%A3%E5%88%97%E8%A1%A8/" title="数据结构与算法03-散列表">数据结构与算法03-散列表</a>
+    </li>
+    
+    <li>
+        <a href="https://liuhang.net.cn/posts/go/golang_basics/" title="Golang-Basics">Golang-Basics</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title">分类</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="/categories/blockchain/">blockchain(1)</a>
+    </li>
+    
+    <li>
+        <a href="/categories/golang/">golang(5)</a>
+    </li>
+    
+    <li>
+        <a href="/categories/linux/">linux(2)</a>
+    </li>
+    
+    <li>
+        <a href="/categories/markdown/">markdown(1)</a>
+    </li>
+    
+    <li>
+        <a href="/categories/network/">network(2)</a>
+    </li>
+    
+    <li>
+        <a href="/categories/vim/">vim(1)</a>
+    </li>
+    
+    <li>
+        <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/">数据结构与算法(3)</a>
+    </li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title">标签</h3>
+<div class="tagcloud">
+    
+    <a href="/tags/algorithm/">algorithm</a>
+    
+    <a href="/tags/data-strutter/">data-strutter</a>
+    
+    <a href="/tags/go/">go</a>
+    
+    <a href="/tags/http/https/">http/https</a>
+    
+    <a href="/tags/linux/">linux</a>
+    
+    <a href="/tags/markdown/">markdown</a>
+    
+    <a href="/tags/systemd/">systemd</a>
+    
+</div>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+        </div>
+    </div>
+</div>
+<footer id="footer">
+    <div class="container">
+        &copy; 2018 <a href="https://liuhang.net.cn/">刘航 By 刘航</a>.
+        Powered by <a rel="nofollow noreferer noopener" href="https://gohugo.io" target="_blank">Hugo</a>.
+        <a href="http://www.flysnow.org/" target="_blank">Theme</a> based on <a href="https://github.com/rujews/maupassant-hugo" target="_blank">maupassant</a>.
+        
+    </div>
+</footer>
+
+
+    <script type="text/javascript" src="/js/prism.js" async="true"></script>
+    <script type="text/javascript">
+    window.MathJax = {
+        tex2jax: {
+            inlineMath: [ ['$','$'] ],
+            processEscapes: true
+        }
+    };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src="/js/totop.js?v=0.0.0" async=""></script>
+
+
+
+
+
+
+</body>
+</html>

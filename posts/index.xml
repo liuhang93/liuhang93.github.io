@@ -6,35 +6,64 @@
     <description>Recent content in Posts on 刘航</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Sun, 03 Feb 2019 14:36:14 +0800</lastBuildDate>
+    <lastBuildDate>Sat, 04 May 2019 17:30:34 +0800</lastBuildDate>
     
 	<atom:link href="https://liuhang.net.cn/posts/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
-      <title>Go总结03 Struct</title>
-      <link>https://liuhang.net.cn/posts/go/go%E6%80%BB%E7%BB%9304-struct/</link>
+      <title>Golang_interface</title>
+      <link>https://liuhang.net.cn/posts/go/golang_interface/</link>
+      <pubDate>Sat, 04 May 2019 17:30:34 +0800</pubDate>
+      
+      <guid>https://liuhang.net.cn/posts/go/golang_interface/</guid>
+      <description> Reference 参考  Go Data Structures: Interfaces  </description>
+    </item>
+    
+    <item>
+      <title>Go总结06 Modules</title>
+      <link>https://liuhang.net.cn/posts/go/golang_modules/</link>
+      <pubDate>Tue, 30 Apr 2019 10:56:29 +0800</pubDate>
+      
+      <guid>https://liuhang.net.cn/posts/go/golang_modules/</guid>
+      <description>  本文对Go Modules使用进行了总结
+Go mod基本使用  Reference 参考  Go mod基本使用 go wiki Modules 语义化版本  </description>
+    </item>
+    
+    <item>
+      <title>Golang String</title>
+      <link>https://liuhang.net.cn/posts/go/golang_string/</link>
+      <pubDate>Tue, 23 Apr 2019 17:49:27 +0800</pubDate>
+      
+      <guid>https://liuhang.net.cn/posts/go/golang_string/</guid>
+      <description>本文对golang中string的用法和底层实现进行了总结和探究。
+ Go String基本用法 Go String Specification  A string type represents the set of string values. A string value is a (possibly empty) sequence of bytes. The number of bytes is called the length of the string and is never negative. Strings are immutable: once created, it is impossible to change the contents of a string. The predeclared string type is string; it is a defined type.</description>
+    </item>
+    
+    <item>
+      <title>Golang Struct</title>
+      <link>https://liuhang.net.cn/posts/go/golang_struct/</link>
       <pubDate>Sun, 03 Feb 2019 14:36:14 +0800</pubDate>
       
-      <guid>https://liuhang.net.cn/posts/go/go%E6%80%BB%E7%BB%9304-struct/</guid>
+      <guid>https://liuhang.net.cn/posts/go/golang_struct/</guid>
       <description></description>
     </item>
     
     <item>
-      <title>Go总结03 Slice</title>
-      <link>https://liuhang.net.cn/posts/go/go%E6%80%BB%E7%BB%9303-slice/</link>
+      <title>Golang Slice</title>
+      <link>https://liuhang.net.cn/posts/go/golang_slice/</link>
       <pubDate>Sun, 03 Feb 2019 14:22:04 +0800</pubDate>
       
-      <guid>https://liuhang.net.cn/posts/go/go%E6%80%BB%E7%BB%9303-slice/</guid>
-      <description> Slice传参问题 Reference  Go Slice传参,值传递 go slices usage and internals  </description>
+      <guid>https://liuhang.net.cn/posts/go/golang_slice/</guid>
+      <description> Slice    Reference  go slices usage and internals Arrays, slices (and strings): The mechanics of &amp;lsquo;append&amp;rsquo;  </description>
     </item>
     
     <item>
       <title>Go总结03 Map</title>
-      <link>https://liuhang.net.cn/posts/go/go%E6%80%BB%E7%BB%9303-map/</link>
+      <link>https://liuhang.net.cn/posts/go/golang_map/</link>
       <pubDate>Sun, 03 Feb 2019 11:14:36 +0800</pubDate>
       
-      <guid>https://liuhang.net.cn/posts/go/go%E6%80%BB%E7%BB%9303-map/</guid>
+      <guid>https://liuhang.net.cn/posts/go/golang_map/</guid>
       <description>本文对golang中map的用法和底层实现进行了总结和探究。
  Go Maps Basic Use 基本使用  首先，对golang map的基本使用和注意事项进行总结。
  Declaration， initialization， assign， iteration， delete 声明、初始化、赋值、迭代、删除  map类型可以定义如下: A map is an unordered group of elements of one type， called the element type， indexed by a set of unique keys of another type， called the key type.(https://golang.org/ref/spec#Map_types)
@@ -53,11 +82,11 @@
     
     <item>
       <title>Go总结02-golang常用工具库</title>
-      <link>https://liuhang.net.cn/posts/go/go%E6%80%BB%E7%BB%9302-golang%E5%B8%B8%E7%94%A8%E5%B7%A5%E5%85%B7%E5%BA%93/</link>
+      <link>https://liuhang.net.cn/posts/go/golang_awesome/</link>
       <pubDate>Fri, 09 Nov 2018 14:44:04 +0800</pubDate>
       
-      <guid>https://liuhang.net.cn/posts/go/go%E6%80%BB%E7%BB%9302-golang%E5%B8%B8%E7%94%A8%E5%B7%A5%E5%85%B7%E5%BA%93/</guid>
-      <description> 读写excel  excelize  爬虫  gocolly 其他参考：goquery  json解  json-iterator/go  </description>
+      <guid>https://liuhang.net.cn/posts/go/golang_awesome/</guid>
+      <description> 读写excel  excelize  爬虫  gocolly 其他参考：goquery  json解  json-iterator/go  Reference 参考  awesome-go  </description>
     </item>
     
     <item>
@@ -71,11 +100,11 @@
     </item>
     
     <item>
-      <title>Go总结01-必备基础知识</title>
-      <link>https://liuhang.net.cn/posts/go/go%E6%80%BB%E7%BB%9301-%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/</link>
+      <title>Golang-Basics</title>
+      <link>https://liuhang.net.cn/posts/go/golang_basics/</link>
       <pubDate>Tue, 06 Nov 2018 13:18:50 +0800</pubDate>
       
-      <guid>https://liuhang.net.cn/posts/go/go%E6%80%BB%E7%BB%9301-%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/</guid>
+      <guid>https://liuhang.net.cn/posts/go/golang_basics/</guid>
       <description> 引言  本文深入探究go命令的执行过程及各种用法。ps：最好的方法果然还是直接go help查看官方给的帮助！ go commands官方文档 官方文档写的贼详细！  go环境变量 go command go build go install go run go get go clean go bug go tool link compile Reference  初探 Go 的编译命令执行过程 2.  </description>
     </item>
     
@@ -149,10 +178,10 @@ $$ x = \dfrac{-b \pm \sqrt{b^2 - 4ac}}{2a} $$
     
     <item>
       <title>Go-http/net</title>
-      <link>https://liuhang.net.cn/posts/go/go-http-net/</link>
+      <link>https://liuhang.net.cn/posts/go/golang_net/</link>
       <pubDate>Wed, 24 Oct 2018 18:34:04 +0800</pubDate>
       
-      <guid>https://liuhang.net.cn/posts/go/go-http-net/</guid>
+      <guid>https://liuhang.net.cn/posts/go/golang_net/</guid>
       <description> 参考  go netwok  </description>
     </item>
     
